@@ -9,10 +9,11 @@ import morgan from "morgan";
 import connectDB from "./src/config/database.js";
 import userRouter from "./src/routes/user.router.js";
 import authRouter from "./src/routes/auth.router.js";
+import * as models from "./src/models/index.js";
 
 const app = express();
 
-// Configuracion
+// Configuración
 dotenv.config();
 app.use(
   cors({
@@ -31,10 +32,26 @@ app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);
 
 app.use("/", (req, res) => {
-  res.send("El servidor esta funcionando correctamente");
+  res.send("El servidor está funcionando correctamente");
 });
 
 app.listen(PORT, async () => {
-  await connectDB();
-  console.log(`El servidor se esta ejecutando en http://localhost:${PORT}`);
+  try {
+    await connectDB();
+    console.log("✅ Conexión a la base de datos exitosa");
+
+    // Mostrar los modelos registrados
+    const modelNames = Object.keys(models);
+    modelNames.forEach((name) => {
+      if (models[name].modelName && models[name].db) {
+        console.log(`Modelo registrado: ${models[name].modelName}`);
+      } else {
+        console.log(`Modelo ${name} ya existe o no se pudo registrar`);
+      }
+    });
+
+    console.log(`El servidor se está ejecutando en http://localhost:${PORT}`);
+  } catch (error) {
+    console.error("Error al iniciar el servidor o conectar DB:", error);
+  }
 });

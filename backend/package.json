@@ -1,5 +1,5 @@
 {
-  "name": "trabajo-practico-integrador-2",
+  "name": "Formosa-Hack",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HaiWeiss/trabajo-practico-integrador-2.git"
+    "url": "git+https://github.com/JavierNicolasMartinez/formosa-hack.git"
   },
   "keywords": [],
   "author": "",
@@ -17,9 +17,10 @@
   "bugs": {
     "url": "https://github.com/HaiWeiss/trabajo-practico-integrador-2/issues"
   },
-  "homepage": "https://github.com/HaiWeiss/trabajo-practico-integrador-2#readme",
+  "homepage": "https://github.com/JavierNicolasMartinez/formosa-hack#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",

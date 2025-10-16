@@ -9,6 +9,16 @@ const UserSchema = new Schema(
       maxLength: 20,
       required: true,
     },
+    first_name: {
+      type: String,
+      required: true,
+      maxLength: 100,
+    },
+    last_name: {
+      type: String,
+      required: true,
+      maxLength: 100,
+    },
     email: {
       type: String,
       unique: true,
@@ -18,6 +28,23 @@ const UserSchema = new Schema(
       type: String,
       required: true,
     },
+    role: {
+      type: String,
+      enum: ["student", "tutor", "admin"],
+      default: "student",
+      required: true,
+    },
+    // Referencias opcionales para perfiles específicos
+    studentProfile: {
+      type: Schema.Types.ObjectId,
+      ref: "Student",
+      default: null,
+    },
+    tutorProfile: {
+      type: Schema.Types.ObjectId,
+      ref: "Tutor",
+      default: null,
+    },
     deletedAt: {
       type: Date,
       default: null,
@@ -25,12 +52,12 @@ const UserSchema = new Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
+// Soft delete: siempre ignorar usuarios eliminados
 UserSchema.pre(/^find/, function (next) {
   this.where({ deletedAt: null });
-
   next();
 });
 

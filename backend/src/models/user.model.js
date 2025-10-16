@@ -9,16 +9,6 @@ const UserSchema = new Schema(
       maxLength: 20,
       required: true,
     },
-    first_name: {
-      type: String,
-      required: true,
-      maxLength: 100,
-    },
-    last_name: {
-      type: String,
-      required: true,
-      maxLength: 100,
-    },
     email: {
       type: String,
       unique: true,
@@ -34,15 +24,9 @@ const UserSchema = new Schema(
       default: "student",
       required: true,
     },
-    // Referencias opcionales para perfiles específicos
-    studentProfile: {
+    profile: {
       type: Schema.Types.ObjectId,
-      ref: "Student",
-      default: null,
-    },
-    tutorProfile: {
-      type: Schema.Types.ObjectId,
-      ref: "Tutor",
+      ref: "Profile",
       default: null,
     },
     deletedAt: {

@@ -1,4 +1,5 @@
 import UserModel from "../models/user.model.js";
+import ProfileModel from "../models/Profile.model.js";
 import { matchedData } from "express-validator";
 import { hashPassword, comparePassword } from "../helpers/bcrypt.helper.js";
 import { generateToken } from "../helpers/jwt.helper.js";
@@ -92,5 +93,24 @@ export const verify = async (req, res) => {
     return res
       .status(500)
       .json({ ok: false, message: "Error interno del servidor" });
+  }
+};
+
+export const createProfile = async (req, res) => {
+  try {
+    const data = matchedData(req, { locations: ["body"] });
+    const profile = await ProfileModel.create(data);
+
+    if (req.user) {
+      await UserModel.findByIdAndUpdate(req.user._id, { profile: profile._id });
+    }
+
+    res.status(201).json({
+      ok: true,
+      message: "Perfil creado exitosamente",
+      data: profile,
+    });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: error.message });
   }
 };

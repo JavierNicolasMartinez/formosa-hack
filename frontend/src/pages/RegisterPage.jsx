@@ -1,9 +1,11 @@
+// src/pages/RegisterPage.jsx
 import { useForm } from "react-hook-form";
 import useAuth from "../hooks/useAuth";
 import { useState } from "react";
 import { CheckCircle } from "lucide-react";
+import { setBlindStudent } from "../utils/accessibility";
 
-function RegisterPage({ userRole }) {
+function RegisterPage({ userRole = "student", onRegisterSuccess }) {
   const {
     register,
     handleSubmit,
@@ -11,23 +13,31 @@ function RegisterPage({ userRole }) {
     watch,
     reset,
   } = useForm();
+
   const { signup, errors: authErrors } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registerSuccess, setRegisterSuccess] = useState(false);
+
   const password = watch("password");
 
   const onSubmit = handleSubmit(async (values) => {
     setIsSubmitting(true);
     try {
-      const dataWithRole = { ...values, role: userRole };
-      const success = await signup(dataWithRole);
+      // Guardamos flag de accesibilidad SOLO si es student
+      if (userRole === "student") {
+        setBlindStudent(!!values.enableVoiceAssist);
+      } else {
+        setBlindStudent(false);
+      }
 
+      const success = await signup({ ...values, role: userRole });
       if (success) {
         setRegisterSuccess(true);
-        reset(); // limpia los campos
+        reset();
+        onRegisterSuccess?.(values.email);
       }
-    } catch (error) {
-      console.error("Error en el registro:", error);
+    } catch (e) {
+      console.error("Error en registro:", e);
     } finally {
       setIsSubmitting(false);
     }
@@ -35,7 +45,6 @@ function RegisterPage({ userRole }) {
 
   return (
     <div className="w-full">
-      {/* Mensaje de éxito */}
       {registerSuccess ? (
         <div className="text-center py-8 flex flex-col justify-center items-center animate-fade-in">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -48,12 +57,11 @@ function RegisterPage({ userRole }) {
             Tu cuenta ha sido creada correctamente.
           </p>
           <p className="text-slate-500 text-sm mt-2">
-            Ahora puedes iniciar sesión desde el menú principal.
+            Redirigiendo al inicio de sesión...
           </p>
         </div>
       ) : (
         <>
-          {/* Título y descripción */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-slate-800 mb-2">
               Crear Cuenta
@@ -64,7 +72,6 @@ function RegisterPage({ userRole }) {
             </p>
           </div>
 
-          {/* Badge de rol */}
           <div className="flex justify-center mb-6">
             <div
               className={`px-4 py-2 rounded-full text-sm font-medium ${
@@ -77,19 +84,17 @@ function RegisterPage({ userRole }) {
             </div>
           </div>
 
-          {/* Errores de autenticación */}
-          {authErrors &&
-            authErrors.map((error, i) => (
-              <div
-                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm"
-                key={i}
-              >
-                {error}
-              </div>
-            ))}
+          {authErrors?.map((error, i) => (
+            <div
+              key={i}
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm"
+            >
+              {error}
+            </div>
+          ))}
 
           <form onSubmit={onSubmit} className="space-y-6">
-            {/* Campo Username */}
+            {/* Username */}
             <div>
               <label className="block text-slate-700 text-sm font-medium mb-2">
                 Nombre de Usuario
@@ -105,7 +110,7 @@ function RegisterPage({ userRole }) {
                 })}
                 className={`w-full px-4 py-3 rounded-lg border ${
                   formErrors.username ? "border-red-500" : "border-slate-300"
-                } focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all`}
+                } focus:outline-none focus:ring-2 focus:ring-slate-500`}
                 placeholder="Elige un nombre de usuario"
               />
               {formErrors.username && (
@@ -115,7 +120,7 @@ function RegisterPage({ userRole }) {
               )}
             </div>
 
-            {/* Campo Email */}
+            {/* Email */}
             <div>
               <label className="block text-slate-700 text-sm font-medium mb-2">
                 Email
@@ -131,7 +136,7 @@ function RegisterPage({ userRole }) {
                 })}
                 className={`w-full px-4 py-3 rounded-lg border ${
                   formErrors.email ? "border-red-500" : "border-slate-300"
-                } focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all`}
+                } focus:outline-none focus:ring-2 focus:ring-slate-500`}
                 placeholder="tu@email.com"
               />
               {formErrors.email && (
@@ -141,7 +146,7 @@ function RegisterPage({ userRole }) {
               )}
             </div>
 
-            {/* Campo Contraseña */}
+            {/* Password */}
             <div>
               <label className="block text-slate-700 text-sm font-medium mb-2">
                 Contraseña
@@ -157,7 +162,7 @@ function RegisterPage({ userRole }) {
                 })}
                 className={`w-full px-4 py-3 rounded-lg border ${
                   formErrors.password ? "border-red-500" : "border-slate-300"
-                } focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all`}
+                } focus:outline-none focus:ring-2 focus:ring-slate-500`}
                 placeholder="Crea una contraseña segura"
               />
               {formErrors.password && (
@@ -167,7 +172,7 @@ function RegisterPage({ userRole }) {
               )}
             </div>
 
-            {/* Confirmar Contraseña */}
+            {/* Confirm password */}
             <div>
               <label className="block text-slate-700 text-sm font-medium mb-2">
                 Confirmar Contraseña
@@ -183,7 +188,7 @@ function RegisterPage({ userRole }) {
                   formErrors.confirmPassword
                     ? "border-red-500"
                     : "border-slate-300"
-                } focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all`}
+                } focus:outline-none focus:ring-2 focus:ring-slate-500`}
                 placeholder="Repite tu contraseña"
               />
               {formErrors.confirmPassword && (
@@ -223,7 +228,22 @@ function RegisterPage({ userRole }) {
               <p className="text-red-500 text-sm">{formErrors.terms.message}</p>
             )}
 
-            {/* Botón */}
+            {/* Accesibilidad por voz SOLO para estudiantes */}
+            {userRole === "student" && (
+              <div className="flex items-start space-x-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <input
+                  type="checkbox"
+                  {...register("enableVoiceAssist")}
+                  className="mt-1 rounded border-slate-300 text-slate-600 focus:ring-slate-500"
+                />
+                <label className="text-sm text-slate-700">
+                  Activar asistencia por voz (accesibilidad visual). Esto
+                  permitirá navegar por voz y escuchar listados de cursos en la
+                  página de búsqueda.
+                </label>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={isSubmitting}

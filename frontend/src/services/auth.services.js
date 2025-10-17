@@ -2,14 +2,14 @@ import axios from "axios";
 
 const API_URL = "http://localhost:3312/api/auth";
 
-const apiClient = axios.create({
+const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // envía cookies automáticamente
+  withCredentials: true,
 });
 
 export const AuthService = {
-  register: (user) => apiClient.post("/register", user),
-  login: (user) => apiClient.post("/login", user),
-  verifyToken: () => apiClient.get("/verify"),
-  logout: () => apiClient.post("/logout"),
+  register: (data) => api.post("/register", data), // <<-- data incluye role
+  login: (data) => api.post("/login", data),
+  verifyToken: () => api.get("/verify"),
+  logout: () => api.post("/logout"),
 };

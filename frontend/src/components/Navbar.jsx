@@ -1,4 +1,6 @@
+// src/components/Navbar.jsx
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import AuthModal from "./AuthModal";
 import {
@@ -21,9 +23,7 @@ export default function Navbar() {
 
   // Cerrar modal cuando se autentica
   useEffect(() => {
-    if (isAuthenticated && modalType) {
-      setModalType(null);
-    }
+    if (isAuthenticated && modalType) setModalType(null);
   }, [isAuthenticated, modalType]);
 
   // Cerrar dropdown al hacer click fuera
@@ -40,6 +40,11 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     setModalType(null);
+    setUserDropdownOpen(false);
+    setMenuOpen(false);
+  };
+
+  const closeOverlays = () => {
     setUserDropdownOpen(false);
     setMenuOpen(false);
   };
@@ -80,42 +85,43 @@ export default function Navbar() {
 
           {/* Navegación principal */}
           <div className="py-2">
-            <a
-              href={user?.role === "tutor" ? "/tutor-dashboard" : "/dashboard"}
+            <Link
+              to={user?.role === "tutor" ? "/tutor-dashboard" : "/dashboard"}
               className="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors"
-              onClick={() => setUserDropdownOpen(false)}
+              onClick={closeOverlays}
             >
               <Settings className="w-4 h-4" />
               <span>Mi Dashboard</span>
-            </a>
+            </Link>
 
-            <a
-              href="/my-courses"
+            {/* 🔹 Mis Cursos → para tutor va a /tutor-courses, para alumno a /my-courses */}
+            <Link
+              to={user?.role === "tutor" ? "/tutor-courses" : "/my-courses"}
               className="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors"
-              onClick={() => setUserDropdownOpen(false)}
+              onClick={closeOverlays}
             >
               <BookOpen className="w-4 h-4" />
               <span>Mis Cursos</span>
-            </a>
+            </Link>
 
             {user?.role === "tutor" ? (
-              <a
-                href="/tutor-courses"
+              <Link
+                to="/create-course"
                 className="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors"
-                onClick={() => setUserDropdownOpen(false)}
+                onClick={closeOverlays}
               >
                 <GraduationCap className="w-4 h-4" />
-                <span>Gestionar Cursos</span>
-              </a>
+                <span>Crear Curso</span>
+              </Link>
             ) : (
-              <a
-                href="/recommended-courses"
+              <Link
+                to="/recommended-courses"
                 className="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors"
-                onClick={() => setUserDropdownOpen(false)}
+                onClick={closeOverlays}
               >
                 <Video className="w-4 h-4" />
                 <span>Cursos Recomendados</span>
-              </a>
+              </Link>
             )}
           </div>
 
@@ -142,38 +148,49 @@ export default function Navbar() {
           <div className="flex justify-between items-center">
             {/* Logo */}
             <div className="flex items-center space-x-2">
-              <a href="/" className="flex items-center space-x-2">
+              <Link to="/" className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-gradient-to-r from-slate-600 to-slate-800 rounded-lg flex items-center justify-center shadow-inner">
                   <span className="text-slate-200 font-bold text-sm">AL</span>
                 </div>
                 <span className="text-xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
                   AdaptaLearn
                 </span>
-              </a>
+              </Link>
             </div>
 
             {/* Menu Desktop */}
-            <div className="hidden md:flex space-x-8">
-              <a
-                href="/courses"
+            <div className="hidden md:flex items-center space-x-8">
+              <Link
+                to="/courses"
                 className="font-medium text-slate-700 hover:text-slate-900 transition-colors"
               >
                 Explorar Cursos
-              </a>
+              </Link>
+
+              {/* 🔹 Links exclusivos para tutor */}
               {isAuthenticated && user?.role === "tutor" && (
-                <a
-                  href="/create-course"
-                  className="font-medium text-slate-700 hover:text-slate-900 transition-colors"
-                >
-                  Crear Curso
-                </a>
+                <>
+                  <Link
+                    to="/tutor-courses"
+                    className="font-medium text-slate-700 hover:text-slate-900 transition-colors"
+                  >
+                    Mis Cursos
+                  </Link>
+                  <Link
+                    to="/create-course"
+                    className="font-medium text-slate-700 hover:text-slate-900 transition-colors"
+                  >
+                    Crear Curso
+                  </Link>
+                </>
               )}
-              <a
-                href="/learning-styles"
+
+              <Link
+                to="/learning-styles"
                 className="font-medium text-slate-700 hover:text-slate-900 transition-colors"
               >
                 Test de Estilos
-              </a>
+              </Link>
             </div>
 
             {/* Botones Desktop */}
@@ -213,7 +230,7 @@ export default function Navbar() {
           >
             {isAuthenticated ? (
               <>
-                {/* Header del menú móvil para usuario autenticado */}
+                {/* Header mobile autenticado */}
                 <div className="flex items-center gap-3 px-2 py-3 bg-slate-50 rounded-lg">
                   <div className="w-10 h-10 bg-gradient-to-r from-slate-600 to-slate-800 rounded-full flex items-center justify-center">
                     <User className="w-5 h-5 text-slate-200" />
@@ -228,73 +245,74 @@ export default function Navbar() {
                   </div>
                 </div>
 
-                <a
-                  href={
+                <Link
+                  to={
                     user?.role === "tutor" ? "/tutor-dashboard" : "/dashboard"
                   }
                   className="flex items-center gap-3 px-2 py-2 text-slate-700 hover:bg-slate-50 transition-colors rounded-lg"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={closeOverlays}
                 >
                   <Settings className="w-5 h-5" />
                   <span>Mi Dashboard</span>
-                </a>
+                </Link>
 
-                <a
-                  href="/my-courses"
+                {/* 🔹 Mis Cursos: tutor → /tutor-courses | alumno → /my-courses */}
+                <Link
+                  to={user?.role === "tutor" ? "/tutor-courses" : "/my-courses"}
                   className="flex items-center gap-3 px-2 py-2 text-slate-700 hover:bg-slate-50 transition-colors rounded-lg"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={closeOverlays}
                 >
                   <BookOpen className="w-5 h-5" />
                   <span>Mis Cursos</span>
-                </a>
+                </Link>
 
                 {user?.role === "tutor" ? (
                   <>
-                    <a
-                      href="/create-course"
+                    <Link
+                      to="/create-course"
                       className="flex items-center gap-3 px-2 py-2 text-slate-700 hover:bg-slate-50 transition-colors rounded-lg"
-                      onClick={() => setMenuOpen(false)}
+                      onClick={closeOverlays}
                     >
                       <GraduationCap className="w-5 h-5" />
                       <span>Crear Curso</span>
-                    </a>
-                    <a
-                      href="/tutor-courses"
+                    </Link>
+                    <Link
+                      to="/tutor-courses"
                       className="flex items-center gap-3 px-2 py-2 text-slate-700 hover:bg-slate-50 transition-colors rounded-lg"
-                      onClick={() => setMenuOpen(false)}
+                      onClick={closeOverlays}
                     >
                       <GraduationCap className="w-5 h-5" />
                       <span>Gestionar Cursos</span>
-                    </a>
+                    </Link>
                   </>
                 ) : (
-                  <a
-                    href="/recommended-courses"
+                  <Link
+                    to="/recommended-courses"
                     className="flex items-center gap-3 px-2 py-2 text-slate-700 hover:bg-slate-50 transition-colors rounded-lg"
-                    onClick={() => setMenuOpen(false)}
+                    onClick={closeOverlays}
                   >
                     <Video className="w-5 h-5" />
                     <span>Cursos Recomendados</span>
-                  </a>
+                  </Link>
                 )}
 
-                <a
-                  href="/courses"
+                <Link
+                  to="/courses"
                   className="flex items-center gap-3 px-2 py-2 text-slate-700 hover:bg-slate-50 transition-colors rounded-lg"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={closeOverlays}
                 >
                   <BookOpen className="w-5 h-5" />
                   <span>Explorar Cursos</span>
-                </a>
+                </Link>
 
-                <a
-                  href="/learning-styles"
+                <Link
+                  to="/learning-styles"
                   className="flex items-center gap-3 px-2 py-2 text-slate-700 hover:bg-slate-50 transition-colors rounded-lg"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={closeOverlays}
                 >
                   <Settings className="w-5 h-5" />
                   <span>Test de Estilos</span>
-                </a>
+                </Link>
 
                 <button
                   onClick={handleLogout}
@@ -306,18 +324,20 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <a
-                  href="/courses"
+                <Link
+                  to="/courses"
                   className="hover:text-slate-600 transition-colors font-medium"
+                  onClick={closeOverlays}
                 >
                   Explorar Cursos
-                </a>
-                <a
-                  href="/learning-styles"
+                </Link>
+                <Link
+                  to="/learning-styles"
                   className="hover:text-slate-600 transition-colors font-medium"
+                  onClick={closeOverlays}
                 >
                   Test de Estilos
-                </a>
+                </Link>
                 <div className="flex flex-col gap-2 pt-2">
                   <button
                     onClick={() => setModalType("login")}

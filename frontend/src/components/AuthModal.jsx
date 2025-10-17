@@ -23,20 +23,16 @@ const AuthModal = ({
   const [registeredEmail, setRegisteredEmail] = useState("");
   const [countdown, setCountdown] = useState(3);
 
-  // ✅ Cuando hay registro exitoso → mostrar mensaje → luego login
+  // Cuando el registro es exitoso → muestra mensaje y cambia a login
   useEffect(() => {
     if (registerSuccess) {
       setCountdown(3);
-      const interval = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-
+      const interval = setInterval(() => setCountdown((c) => c - 1), 1000);
       const timeout = setTimeout(() => {
         setModalType("login");
         setRegisterSuccess(false);
-        setRegisteredEmail("");
+        // dejamos email prellenado para Login
       }, 3000);
-
       return () => {
         clearInterval(interval);
         clearTimeout(timeout);
@@ -47,7 +43,6 @@ const AuthModal = ({
   const handleRegisterSuccess = (email) => {
     setRegisteredEmail(email);
     setRegisterSuccess(true);
-    console.log("✅ Registro exitoso detectado");
   };
 
   const handleClose = () => {
@@ -59,7 +54,7 @@ const AuthModal = ({
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
       <div className="bg-white w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh] my-auto">
-        {/* PANEL LATERAL (Desktop) */}
+        {/* Lateral (solo si no hay éxito) */}
         {!registerSuccess && (
           <div className="hidden lg:flex lg:w-2/5 bg-gradient-to-br from-slate-700 to-slate-900 text-white p-6 flex-col justify-between">
             <div>
@@ -69,7 +64,7 @@ const AuthModal = ({
                   : "Comienza tu journey"}
               </h2>
 
-              {/* Selector de rol Desktop */}
+              {/* Selector de rol (Desktop) */}
               {modalType === "register" && (
                 <RoleSelectorDesktop
                   userRole={userRole}
@@ -77,7 +72,6 @@ const AuthModal = ({
                 />
               )}
 
-              {/* Información lateral */}
               <div className="space-y-3">
                 {modalType === "login" ? (
                   <>
@@ -122,7 +116,6 @@ const AuthModal = ({
               </div>
             </div>
 
-            {/* Toggle login/register */}
             <div className="text-slate-300 text-sm">
               {modalType === "login"
                 ? "¿Primera vez aquí?"
@@ -139,14 +132,12 @@ const AuthModal = ({
           </div>
         )}
 
-        {/* PANEL PRINCIPAL */}
+        {/* Panel principal */}
         <div
-          className={`w-full ${
-            registerSuccess ? "lg:w-full" : "lg:w-3/5"
-          } p-6 overflow-y-auto`}
+          className={`w-full ${registerSuccess ? "lg:w-full" : "lg:w-3/5"} p-6 overflow-y-auto`}
         >
-          {/* Botón cerrar */}
-          <div className="flex justify-end mb-6">
+          {/* Cerrar */}
+          <div className="flex justify-end items-center mb-6">
             <button
               onClick={handleClose}
               className="text-slate-400 hover:text-slate-600 transition-colors"
@@ -160,7 +151,7 @@ const AuthModal = ({
             <RoleSelectorMobile userRole={userRole} setUserRole={setUserRole} />
           )}
 
-          {/* Contenido principal */}
+          {/* Contenido */}
           {registerSuccess ? (
             <SuccessMessage countdown={countdown} />
           ) : modalType === "login" ? (
@@ -196,8 +187,7 @@ const AuthModal = ({
   );
 };
 
-// ✅ Subcomponentes reutilizables
-
+// Subcomponentes
 const InfoItem = ({ color, icon, text }) => (
   <div className="flex items-center space-x-3">
     <div
@@ -226,7 +216,6 @@ const SuccessMessage = ({ countdown }) => (
   </div>
 );
 
-// ✅ Selector de rol (desktop)
 const RoleSelectorDesktop = ({ userRole, setUserRole }) => (
   <div className="flex space-x-2 mb-4 bg-slate-600/30 rounded-lg p-1">
     <button
@@ -254,7 +243,6 @@ const RoleSelectorDesktop = ({ userRole, setUserRole }) => (
   </div>
 );
 
-// ✅ Selector de rol (mobile)
 const RoleSelectorMobile = ({ userRole, setUserRole }) => (
   <div className="flex space-x-2 mb-6 bg-slate-100 rounded-lg p-1 lg:hidden">
     <button

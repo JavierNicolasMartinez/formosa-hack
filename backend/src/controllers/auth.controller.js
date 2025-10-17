@@ -4,75 +4,148 @@ import { matchedData } from "express-validator";
 import { hashPassword, comparePassword } from "../helpers/bcrypt.helper.js";
 import { generateToken } from "../helpers/jwt.helper.js";
 
+// REGISTER
 export const register = async (req, res) => {
   try {
     const data = matchedData(req, { locations: ["body"] });
-
     data.password = await hashPassword(data.password);
 
-    const user = await UserModel.create(data);
+    // Crear perfil vacío o con datos si vienen en req.body.profile
+    const profileData = data.profile || {};
+
+    const profile = await ProfileModel.create(profileData);
+
+    const user = await UserModel.create({
+      username: data.username,
+      email: data.email,
+      password: data.password,
+      role: data.role || "student",
+      profile: profile._id,
+    });
 
     res.status(201).json({
       ok: true,
       message: "Usuario creado",
-      data: { id: user._id, email: user.email },
+      data: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        profile: {
+          first_name: user.profile.first_name, required: false,
+          last_name: user.profile.last_name, required: false,
+          bio: user.profile.bio, required: false,
+          methodology: user.profile.methodology,
+        }
+      }
     });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }
 };
 
+// LOGIN
 export const login = async (req, res) => {
   try {
     const data = matchedData(req, { locations: ["body"] });
-    const user = await UserModel.findOne({ email: data.email });
+
+    // Buscar al usuario por email
+    const user = await UserModel.findOne({ email: data.email }).populate("profile");
 
     if (!user)
-      return res.status(401).json({ ok: false, message: "Email invalido" });
+      return res.status(401).json({ ok: false, message: "Email inválido" });
 
+    // Verificar contraseña
     const valid = await comparePassword(data.password, user.password);
     if (!valid)
-      return res
-        .status(401)
-        .json({ ok: false, message: "Contraseña incorrecta" });
+      return res.status(401).json({ ok: false, message: "Contraseña incorrecta" });
 
+    // Generar token
     const token = generateToken(user._id);
 
+    // Responder
     res
-      .cookie("token", token, {
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60,
-      })
+      .cookie("token", token, { httpOnly: true, maxAge: 1000 * 60 * 60 })
       .status(200)
       .json({
         ok: true,
         message: "Login exitoso",
-        data: { id: user._id, username: user.username, email: user.email },
+        data: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          profile: user.profile
+            ? {
+                first_name: user.profile.first_name || null,
+                last_name: user.profile.last_name || null,
+                bio: user.profile.bio || null,
+                methodology: user.profile.methodology || null,
+              }
+            : null,
+        },
       });
   } catch (e) {
     res.status(500).json({ ok: false, message: e.message });
   }
 };
 
-export const logout = (req, res) => {
-  res.clearCookie("token").json({ ok: true, message: "Logout exitoso" });
-};
-
+// GET PROFILE
 export const getProfile = async (req, res) => {
-  res.status(200).json({ ok: true, data: req.user });
+  try {
+    const user = await UserModel.findById(req.user._id)
+      .populate("profile");
+
+    res.status(200).json({
+      ok: true,
+      data: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        profile: user.profile ? {
+          first_name: user.profile.first_name,
+          last_name: user.profile.last_name,
+          bio: user.profile.bio,
+          methodology: user.profile.methodology,
+        } : null
+      }
+    });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: e.message });
+  }
 };
 
+
+// UPDATE PROFILE
 export const updateProfile = async (req, res) => {
   try {
     const data = matchedData(req, { locations: ["body"] });
 
-    const updated = await UserModel.findByIdAndUpdate(
-      req.user._id,
-      { $set: { profile: data } },
-      { new: true, select: "-password" },
-    );
+    // Si vienen intereses como nombres, convertir a ObjectId
+    if (data.interests && data.interests.length > 0) {
+      const interests = await InterestModel.find({
+        name: { $in: data.interests.map(i => i.name) }
+      });
+      data.interests = interests.map(i => i._id);
+    }
 
-    res.status(200).json({ ok: true, data: updated });
+    const updated = await ProfileModel.findByIdAndUpdate(
+      req.user.profile,
+      { $set: data },
+      { new: true }
+    ).populate("interests");
+
+    res.status(200).json({
+      ok: true,
+      data: {
+        first_name: updated.first_name,
+        last_name: updated.last_name,
+        bio: updated.bio,
+        methodology: updated.methodology,
+        interests: updated.interests.map(i => ({ id: i._id, name: i.name }))
+      }
+    });
   } catch (e) {
     res.status(500).json({ ok: false, message: e.message });
   }
@@ -80,37 +153,81 @@ export const updateProfile = async (req, res) => {
 
 export const verify = async (req, res) => {
   try {
-    // Ya viene del middleware authenticate, sin contraseña
-    const user = req.user;
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({
+        ok: false,
+        message: "No hay token",
+      });
+    }
+
+    const decoded = verifyToken(token);
+
+    if (!decoded) {
+      return res.status(401).json({
+        ok: false,
+        message: "Token inválido",
+      });
+    }
 
     return res.status(200).json({
       ok: true,
-      message: "Sesión activa",
-      data: user,
+      message: "Token válido",
+      userId: decoded.id,
     });
-  } catch (error) {
-    console.error("Error en verify:", error);
-    return res
-      .status(500)
-      .json({ ok: false, message: "Error interno del servidor" });
+  } catch (e) {
+    res.status(500).json({
+      ok: false,
+      message: e.message,
+    });
+  }
+};
+
+// LOGOUT
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie("token"); // elimina la cookie JWT
+    res.status(200).json({
+      ok: true,
+      message: "Logout exitoso",
+    });
+  } catch (e) {
+    res.status(500).json({
+      ok: false,
+      message: e.message,
+    });
   }
 };
 
 export const createProfile = async (req, res) => {
   try {
     const data = matchedData(req, { locations: ["body"] });
-    const profile = await ProfileModel.create(data);
 
-    if (req.user) {
+    let profile;
+    if (req.user.profile) {
+      // Actualiza perfil existente
+      profile = await ProfileModel.findByIdAndUpdate(
+        req.user.profile,
+        { $set: data },
+        { new: true }
+      );
+    } else {
+      // Crea nuevo perfil
+      profile = await ProfileModel.create(data);
       await UserModel.findByIdAndUpdate(req.user._id, { profile: profile._id });
     }
 
-    res.status(201).json({
+    res.status(200).json({
       ok: true,
-      message: "Perfil creado exitosamente",
-      data: profile,
+      data: {
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        bio: profile.bio,
+        methodology: profile.methodology,
+      },
     });
-  } catch (error) {
-    res.status(500).json({ ok: false, message: error.message });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: e.message });
   }
 };

@@ -32,7 +32,7 @@ export const createUserValidation = [
     .isLength({ min: 8 })
     .withMessage("La contraseña debe tener al menos 8 caracteres")
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/)
-    .withMessage("La contraseña debe tener mayúscula, minúscula y número"),
+    .withMessage("La contraseña debe tener mayúscula, minúscula y número")
 ];
 
 export const updateProfileValidation = [

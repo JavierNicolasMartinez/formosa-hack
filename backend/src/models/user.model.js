@@ -29,6 +29,11 @@ const UserSchema = new Schema(
       ref: "Profile",
       default: null,
     },
+    profileComplete: {
+      type: Boolean,
+      default: false,
+      required: false
+    },
     deletedAt: {
       type: Date,
       default: null,

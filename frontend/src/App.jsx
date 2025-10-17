@@ -3,10 +3,12 @@ import { Routes, Route, Navigate, Link } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import CourseSearchPage from "./pages/CourseSearchPage";
 import VoiceCommandButton from "./components/VoiceCommandButton";
+import Navbar from "./components/Navbar";
 
 function App() {
   return (
     <div className="">
+      <Navbar />
       <main className="">
         {/* <VoiceCommandButton />*/}
         <Routes>

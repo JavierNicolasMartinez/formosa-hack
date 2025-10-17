@@ -2,11 +2,9 @@ import UserModel from "../models/user.model.js";
 import ProfileModel from "../models/Profile.model.js";
 import { matchedData } from "express-validator";
 import { hashPassword, comparePassword } from "../helpers/bcrypt.helper.js";
-import { generateToken } from "../helpers/jwt.helper.js";
+import { generateToken, verifyToken } from "../helpers/jwt.helper.js";
 import TestModel from "../models/test.model.js";
-import StudentModel from "../models/Student.model.js";
 import StudentResultModel from "../models/StudentResult.model.js";
-import { calculateStudyMethod } from "../utils/calculateStudyMethod.js";
 
 export const register = async (req, res) => {
   try {
@@ -27,65 +25,10 @@ export const register = async (req, res) => {
       profile: profile._id,
     });
 
-    // 4️⃣ Crear estudiante asociado
-    const student = await StudentModel.create({ user: user._id });
-
-    // 5️⃣ Obtener todas las preguntas del test
-    const testQuestions = await TestModel.find();
-
-    // 6️⃣ Crear StudentResult inicial con todas las preguntas
-    const initialAnswers = testQuestions.map(q => ({
-      question: q._id,
-      answer: null,
-      score: 0,
-    }));
-
-    await StudentResultModel.create({
-      student: student._id,
-      form: null,
-      answers: initialAnswers,
-      totalScore: 0,
-      maxScore: testQuestions.reduce(
-        (sum, q) => sum + Math.max(...q.options.map(o => o.score)),
-        0
-      ),
-    });
-
-    // 7️⃣ Preparar respuestas para calcular metodología
-    const studentAnswers = testQuestions.map(q => {
-      // Tomamos la primera opción de cada pregunta como predeterminada
-      const option = q.options[0];
-      return {
-        type: option.type, // Visual / Auditory / Kinesthetic
-        score: option.score,
-      };
-    });
-
-    // 8️⃣ Calcular metodología recomendada
-    const { recommendedMethod } = calculateStudyMethod(studentAnswers);
-
-    // 9️⃣ Obtener ObjectId de la metodología en DB
-    const studyMethods = await StudyMethodModel.find();
-    const methodMap = studyMethods.reduce((acc, m) => {
-      acc[m.name] = m._id;
-      return acc;
-    }, {});
-
-    //  🔟 Asignar la metodología al estudiante
-    student.studyMethod = methodMap[recommendedMethod];
-    await student.save();
-
     res.status(201).json({
       ok: true,
       message:
-        "Usuario creado, test psicopedagógico inicial generado y metodología asignada",
-      data: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        studyMethod: recommendedMethod,
-      },
+        "Usuario creado",
     });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });

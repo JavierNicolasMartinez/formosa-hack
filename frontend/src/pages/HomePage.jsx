@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function HomePage() {
   return (
     <div className="bg-gradient-to-br from-slate-50 to-gray-100 text-gray-800 font-sans scroll-smooth">
@@ -7,7 +9,6 @@ function HomePage() {
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center space-x-2 bg-slate-200 text-slate-700 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-slate-300">
-              <span>🎓</span>
               <span>Plataforma educativa premium</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
@@ -32,21 +33,19 @@ function HomePage() {
               .
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
-              <a
-                href="#"
+              <Link
+                href="/register"
                 className="group bg-gradient-to-r from-slate-700 to-slate-900 text-slate-100 px-10 py-4 rounded-2xl text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2 border border-slate-600"
               >
-                <span>📚</span>
                 <span>Descubrir mi Estilo de Aprendizaje</span>
                 <span className="group-hover:translate-x-1 transition-transform">
                   →
                 </span>
-              </a>
+              </Link>
               <a
                 href="#"
                 className="group bg-white/80 backdrop-blur-sm border border-slate-300 text-slate-700 px-10 py-4 rounded-2xl text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2"
               >
-                <span>👨‍🏫</span>
                 <span>Empezar a Enseñar</span>
               </a>
             </div>

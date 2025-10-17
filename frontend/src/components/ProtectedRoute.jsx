@@ -1,22 +1,27 @@
-import { Navigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+export default function ProtectedRoute({ allowedRoles = [] }) {
+  const { isAuthenticated, loading, user, forceCompleteProfile } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <h1 className="text-3xl font-bold">Cargando...</h1>
-      </div>
-    );
-  }
+  if (loading) return <div>Loading...</div>;
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    // If not authenticated send to homepage where modal can be opened
+    return <Navigate to="/" replace />;
   }
 
-  return children;
-}
+  // If logged in but profile is incomplete, force to complete-profile
+  if (forceCompleteProfile) {
+    return <Navigate to="/complete-profile" replace />;
+  }
 
-export default ProtectedRoute;
+  // Role guard
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
+    // unauthorized: you could send to a 403 page or homepage
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />; // render nested routes
+}

@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "node --watch app.js"
+    "dev": "node --watch app.js",
+    "seed": "node src/seeders/fullSeeder.js"
   },
   "repository": {
     "type": "git",

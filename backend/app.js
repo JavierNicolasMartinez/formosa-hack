@@ -10,6 +10,7 @@ import connectDB from "./src/config/database.js";
 import userRouter from "./src/routes/user.router.js";
 import authRouter from "./src/routes/auth.router.js";
 import * as models from "./src/models/index.js";
+import router from "./src/routes/index.js";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(morgan("tiny"));
 const PORT = process.env.PORT || 3000;
 
 // Rutas
+app.use("/api", router);
 app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);
 

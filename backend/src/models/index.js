@@ -18,6 +18,7 @@ import StudyMethod from "./StudyMethod.model.js";
 import Tutor from "./Tutor.model.js";
 import TutorRating from "./TutorRating.model.js";
 import User from "./user.model.js";
+import Test from "./test.js";
 
 // 📌 Usuario - Estudiante / Tutor / Admin
 // Ya están en User, reforzamos para consulta cruzada
@@ -126,4 +127,5 @@ export {
   Tutor,
   TutorRating,
   User,
+  Test,
 };

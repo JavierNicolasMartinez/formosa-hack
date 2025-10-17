@@ -20,7 +20,7 @@ import {
   Tutor,
   TutorRating,
   User,
-} from "./models/index.js";
+} from "../models/index.js";
 
 dotenv.config();
 
@@ -59,7 +59,6 @@ const seedDatabase = async () => {
       { name: "Kinesthetic", description: "Aprende haciendo actividades físicas" },
     ]);
 
-    // Hashear password
     const hashedPassword = await bcrypt.hash("123456", 10);
 
     // Crear usuarios
@@ -98,7 +97,7 @@ const seedDatabase = async () => {
     ]);
 
     // Crear admin
-    const admin = await Admin.create({
+    await Admin.create({
       user: users.find(u => u.role === "admin")._id,
       roleDescription: "Administrador del sistema",
     });
@@ -121,13 +120,13 @@ const seedDatabase = async () => {
       },
     ]);
 
-    // Crear formularios
+    // Formularios
     const forms = await Form.insertMany([
       { title: "Quiz Matemática", content: contents[0]._id, difficulty: "basic" },
       { title: "Quiz Física", content: contents[1]._id, difficulty: "intermediate" },
     ]);
 
-    // Crear preguntas
+    // Preguntas
     const questions = await Question.insertMany([
       {
         form: forms[0]._id,
@@ -150,29 +149,25 @@ const seedDatabase = async () => {
       },
     ]);
 
-    // Crear resultados de estudiantes
+    // Resultados de estudiantes
     await StudentResult.insertMany([
       {
         student: students[0]._id,
         form: forms[0]._id,
-        answers: [
-          { question: questions[0]._id, answer: "4", correct: true, score: 1 },
-        ],
+        answers: [{ question: questions[0]._id, answer: "4", correct: true, score: 1 }],
         totalScore: 1,
         maxScore: 1,
       },
       {
         student: students[1]._id,
         form: forms[1]._id,
-        answers: [
-          { question: questions[1]._id, answer: "Verdadero", correct: true, score: 1 },
-        ],
+        answers: [{ question: questions[1]._id, answer: "Verdadero", correct: true, score: 1 }],
         totalScore: 1,
         maxScore: 1,
       },
     ]);
 
-    // Content Views
+    // ContentView
     await ContentView.insertMany([
       { student: students[0]._id, content: contents[0]._id, completed: true, progress: 100 },
       { student: students[1]._id, content: contents[1]._id, completed: false, progress: 50 },
@@ -184,7 +179,7 @@ const seedDatabase = async () => {
       { student: students[1]._id, content: contents[1]._id, comment: "Interesante contenido" },
     ]);
 
-    // Tutor ratings
+    // TutorRating
     await TutorRating.insertMany([
       { student: students[0]._id, tutor: tutors[0]._id, stars: 5, comment: "Excelente tutor" },
       { student: students[1]._id, tutor: tutors[0]._id, stars: 4, comment: "Buena explicación" },
@@ -196,7 +191,7 @@ const seedDatabase = async () => {
       { sender: users[1]._id, recipient: users[2]._id, content: "Hola tutor, consulta sobre física" },
     ]);
 
-    // Reports / Denuncias
+    // Reportes
     await Report.insertMany([
       { student: students[0]._id, content: contents[1]._id, reason: "Contenido inapropiado" },
     ]);

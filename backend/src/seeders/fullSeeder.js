@@ -102,23 +102,24 @@ const seedDatabase = async () => {
       roleDescription: "Administrador del sistema",
     });
 
-    // Crear contenidos
+    console.log("Tutores creados:", tutors.map(t => t._id));
     const contents = await Content.insertMany([
-      {
+    {
         title: "Matemática básica",
         description: "Introducción a álgebra",
         type: "PDF",
         level: "short",
-        tutor: tutors[0]._id,
-      },
-      {
+        tutor: tutors[0]?._id, // seguridad si tutors[0] no existe
+    },
+    {
         title: "Física avanzada",
         description: "Conceptos de mecánica",
         type: "Video",
         level: "medium",
-        tutor: tutors[0]._id,
-      },
+        tutor: tutors[0]?._id,
+    },
     ]);
+    console.log("Contents creados:", contents);
 
     // Formularios
     const forms = await Form.insertMany([

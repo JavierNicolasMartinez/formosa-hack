@@ -14,6 +14,7 @@ import MessageRouter from "./message.router.js";
 import QuestionRouter from "./question.router.js";
 import RecommendationRouter from "./recommendation.router.js";
 import ReminderRouter from "./reminder.router.js";
+import testRouter from "./test.router.js";
 
 const router = express.Router();
 
@@ -32,7 +33,7 @@ router.use("/messages", MessageRouter);
 router.use("/questions", QuestionRouter);
 router.use("/recommendations", RecommendationRouter);
 router.use("/reminders", ReminderRouter);
-
+router.use("/tests", testRouter);
 
 
 export default router;

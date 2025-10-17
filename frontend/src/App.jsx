@@ -8,7 +8,7 @@ function App() {
   return (
     <div className="">
       <main className="">
-        <VoiceCommandButton />
+        {/* <VoiceCommandButton />*/}
         <Routes>
           {/* --- Rutas Públicas --- */}
           <Route path="/" element={<HomePage />} />

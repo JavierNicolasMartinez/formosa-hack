@@ -1,5 +1,33 @@
 import TutorRating from "../models/TutorRating.model.js";
 
+// Crear nuevo contenido
+export const createContent = async (req, res) => {
+  try {
+    const tutorId = req.user.tutorProfile; // asumimos que middleware auth setea req.user
+    const { title, description, type, level, category, tags } = req.body;
+
+    if (!title || !type) {
+      return res.status(400).json({ ok: false, msg: "Título y tipo son requeridos" });
+    }
+
+    // Crear contenido
+    const newContent = await Content.create({
+      title,
+      description,
+      type, // "PDF", "Audio" o "Video"
+      level: level || "short", // default
+      category: category || "",
+      tags: tags || [],
+      tutor: tutorId,
+    });
+
+    res.status(201).json({ ok: true, data: newContent });
+  } catch (error) {
+    console.error("Error creando contenido:", error);
+    res.status(500).json({ ok: false, msg: "Error al crear contenido" });
+  }
+};
+
 export const getAllTutorRatings = async (req, res) => {
   try {
     const ratings = await TutorRating.find()
